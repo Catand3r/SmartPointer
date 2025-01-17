@@ -11,10 +11,24 @@ template <typename T> class UniquePointer
 
     UniquePointer(const UniquePointer<T> &) = delete;
 
+    UniquePointer(UniquePointer<T> &&uniquePtr)
+    {
+        pointer_ = uniquePtr.pointer_;
+        uniquePtr.pointer_ = nullptr;
+    }
+
     ~UniquePointer()
     {
         delete pointer_;
     }
+
+    void operator=(UniquePointer<T> &&uniquePtr)
+    {
+        pointer_ = uniquePtr.pointer_;
+        uniquePtr.pointer_ = nullptr;
+    }
+
+    void operator=(const UniquePointer<T> &) = delete;
 
     T &operator*()
     {
@@ -89,6 +103,22 @@ template <typename T> class SharedPointer
         }
         else if (controlBlock_ != nullptr)
             controlBlock_->counter_--;
+    }
+
+    void operator=(SharedPointer<T> &&sharedPtr)
+    {
+        pointer_ = sharedPtr.pointer_;
+        sharedPtr.pointer_ = nullptr;
+        controlBlock_ = sharedPtr.controlBlock_;
+        sharedPtr.controlBlock_ = nullptr;
+    }
+
+    void operator=(const SharedPointer<T> &copyPointer)
+    {
+        pointer_ = copyPointer.pointer_;
+        controlBlock_ = copyPointer.controlBlock_;
+        if (pointer_ != nullptr)
+            controlBlock_->counter_++;
     }
 
     T &operator*()

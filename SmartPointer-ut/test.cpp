@@ -24,6 +24,27 @@ TEST(UniquePtrTests, ShouldReturnNullptrWhenResetIsCalled)
     EXPECT_EQ(pointer, nullptr);
 }
 
+TEST(UniquePtrTests, MoveConstructorShouldChangeOwnership)
+{
+    UniquePointer<int> uniquePointer(new int(5));
+    auto rawPtr = uniquePointer.get();
+    UniquePointer<int> up2 = std::move(uniquePointer);
+    auto rawPtr2 = up2.get();
+
+    EXPECT_EQ(rawPtr, rawPtr2);
+}
+
+TEST(UniquePtrTests, MoveAssignmentConstructorShouldChangeOwnership)
+{
+    UniquePointer<int> uniquePointer(new int(5));
+    auto rawPtr = uniquePointer.get();
+    UniquePointer<int> up2(nullptr);
+    up2 = std::move(uniquePointer);
+    auto rawPtr2 = up2.get();
+
+    EXPECT_EQ(rawPtr, rawPtr2);
+}
+
 TEST(SharedPtrTests, SharedPointersShouldReturnTheSameValueWhenDereferenceOperatorCalled)
 {
     SharedPointer<int> sharedPointer1(new int(5));
@@ -78,4 +99,36 @@ TEST(SharedPtrTests, VerifySharedPointerReferenceCountAfterCopyConstruction3)
 
     EXPECT_EQ(sharedPointer1.use_count(), 0);
     EXPECT_EQ(sharedPointer2.use_count(), 0);
+}
+
+TEST(SharedPtrTests, MoveConstructorShouldChangeOwnership)
+{
+    SharedPointer<int> sharedPointer(new int(5));
+    auto rawPtr = sharedPointer.get();
+    SharedPointer<int> up2 = std::move(sharedPointer);
+    auto rawPtr2 = up2.get();
+
+    EXPECT_EQ(rawPtr, rawPtr2);
+}
+
+TEST(SharedPtrTests, MoveAssignmentConstructorShouldChangeOwnership)
+{
+    SharedPointer<int> sharedPointer(new int(5));
+    auto rawPtr = sharedPointer.get();
+    SharedPointer<int> up2(nullptr);
+    up2 = std::move(sharedPointer);
+    auto rawPtr2 = up2.get();
+
+    EXPECT_EQ(rawPtr, rawPtr2);
+}
+
+TEST(SharedPtrTests, MoveAssignmentConstructorShouldChangeOwnership2)
+{
+    SharedPointer<int> sp1(new int(5));
+    SharedPointer<int> sp2(sp1);
+
+    SharedPointer<int> up2(new int(4)); // tutaj mamy memory leak
+    up2 = std::move(sp2);
+
+    EXPECT_EQ(sp1.use_count(), 2);
 }
