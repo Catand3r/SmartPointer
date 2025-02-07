@@ -11,7 +11,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     env:
-      SOLUTION_FILE_PATH: Vector.sln
+      SOLUTION_FILE_PATH: SmartPointer.sln
       BUILD_CONFIGURATION: Release
 
 #permissions:
@@ -37,4 +37,4 @@ jobs:
     - name: Run Tests
       run: |
           cd x64\Release
-          ./Vector-ut.exe
+          ./SmartPointer-ut.exe
