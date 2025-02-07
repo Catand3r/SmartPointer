@@ -71,7 +71,7 @@ template <typename T> class UniquePointer
 class ControlBlock
 {
   public:
-    uint64_t counter_ = 0;
+    uint64_t counter_ = 1;
 };
 
 template <typename T> class SharedPointer
@@ -82,8 +82,15 @@ template <typename T> class SharedPointer
         if (pointer_ != nullptr)
         {
             controlBlock_ = new ControlBlock();
-            controlBlock_->counter_++;
         }
+    }
+
+    SharedPointer(SharedPointer<T> &&sharedPtr)
+    {
+        pointer_ = sharedPtr.pointer_;
+        sharedPtr.pointer_ = nullptr;
+        controlBlock_ = sharedPtr.controlBlock_;
+        sharedPtr.controlBlock_ = nullptr;
     }
 
     SharedPointer(const SharedPointer<T> &copyPointer)
@@ -107,6 +114,13 @@ template <typename T> class SharedPointer
 
     void operator=(SharedPointer<T> &&sharedPtr)
     {
+        if (unique())
+        {
+            delete pointer_;
+            delete controlBlock_;
+        }
+        else if (controlBlock_ != nullptr)
+            controlBlock_->counter_--;
         pointer_ = sharedPtr.pointer_;
         sharedPtr.pointer_ = nullptr;
         controlBlock_ = sharedPtr.controlBlock_;
@@ -115,6 +129,13 @@ template <typename T> class SharedPointer
 
     void operator=(const SharedPointer<T> &copyPointer)
     {
+        if (unique())
+        {
+            delete pointer_;
+            delete controlBlock_;
+        }
+        else if (controlBlock_ != nullptr)
+            controlBlock_->counter_--;
         pointer_ = copyPointer.pointer_;
         controlBlock_ = copyPointer.controlBlock_;
         if (pointer_ != nullptr)

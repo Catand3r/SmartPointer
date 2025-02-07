@@ -127,8 +127,37 @@ TEST(SharedPtrTests, MoveAssignmentConstructorShouldChangeOwnership2)
     SharedPointer<int> sp1(new int(5));
     SharedPointer<int> sp2(sp1);
 
-    SharedPointer<int> up2(new int(4)); // tutaj mamy memory leak
-    up2 = std::move(sp2);
+    SharedPointer<int> up2(new int(4));
+    SharedPointer<int> sp3(up2);
 
+    /*
+    sp1 = 5
+    sp2 = 5
+    up2 = 4
+    sp3 = 4
+    */
+    EXPECT_EQ(sp3.use_count(), 2);
+
+    up2 = std::move(sp2);
+    /*
+    sp1 = 5
+    sp2 -> nullptr
+    up2 = 5
+    sp3 = 4
+    */
+    EXPECT_EQ(sp3.use_count(), 1);
+    EXPECT_EQ(sp1.use_count(), 2);
+    EXPECT_EQ(up2.use_count(), 2);
+
+    sp1 = sp3;
+
+    /*
+    sp1 = 4
+    sp2 -> nullptr
+    up2 = 5
+    sp3 = 4
+    */
+    EXPECT_EQ(sp3.use_count(), 2);
+    EXPECT_EQ(sp2.use_count(), 0);
     EXPECT_EQ(sp1.use_count(), 2);
 }
